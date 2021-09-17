@@ -1,11 +1,9 @@
 {
-  "name": "entrepot-watcher",
-  "version": "1.0.0",
+  "name": "entrebot",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "latest": "ts-node runLatest.ts",
-    "tasks": "ts-node runTasks.ts",
     "start": "nodemon -- --files src/index.ts",
     "build": "rm -rf build && tsc",
     "serve": "node build/index.js"

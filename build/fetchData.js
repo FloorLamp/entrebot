@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchListings = exports.fetchRecentTransactions = void 0;
+exports.fetchListings = exports.fetchAllListings = exports.fetchRecentTransactions = void 0;
 const luxon_1 = require("luxon");
 const data_json_1 = __importDefault(require("./cache/data.json"));
 const common_1 = require("./common");
@@ -14,12 +14,13 @@ async function fetchRecentTransactions(count = 5) {
     // results are in ascending order
     const txs = await common_1.wrapper.getTransactions([BigInt(count)]);
     txs.reverse();
-    return {
-        now: luxon_1.DateTime.utc().toISO(),
-        data: txs,
-    };
+    return txs;
 }
 exports.fetchRecentTransactions = fetchRecentTransactions;
+async function fetchAllListings() {
+    return await common_1.wrapper.listings();
+}
+exports.fetchAllListings = fetchAllListings;
 async function fetchListings(query = { name_prefix: "8 Bit" }) {
     const queryEntries = Object.entries(query);
     const allMatches = Object.entries(data)

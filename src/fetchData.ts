@@ -17,10 +17,11 @@ export async function fetchRecentTransactions(count: number = 5) {
   // results are in ascending order
   const txs = await wrapper.getTransactions([BigInt(count)]);
   txs.reverse();
-  return {
-    now: DateTime.utc().toISO(),
-    data: txs,
-  };
+  return txs;
+}
+
+export async function fetchAllListings() {
+  return await wrapper.listings();
 }
 
 export async function fetchListings(

@@ -1,9 +1,11 @@
 import { Principal } from "@dfinity/principal";
 import { TextChannel } from "discord.js";
 import fs from "fs";
+import { DateTime } from "luxon";
 import dataJson from "./cache/data.json";
 import { LootData } from "./Drip/Drip.did";
-import { fetchRecentTransactions } from "./fetchData";
+import { fetchAllListings, fetchRecentTransactions } from "./fetchData";
+import { Awaited, MapType } from "./types";
 import {
   dateTimeFromNanos,
   decodeTokenId,
@@ -12,30 +14,42 @@ import {
   shortPrincipal,
   stringify,
 } from "./utils";
-import { Transaction } from "./Wrapper/Wrapper.did";
+import { Transaction, _SERVICE } from "./Wrapper/Wrapper.did";
 const data = dataJson as Record<string, LootData[]>;
 
-export type MapType<T, A, B> = {
-  [Key in keyof T]: T[Key] extends A
-    ? B
-    : T[Key] extends Record<any, any>
-    ? MapType<T[Key], A, B>
-    : T[Key];
-};
-export type JsonData = MapType<
-  MapType<Data, Principal, string>,
+export type JsonTransactionData = MapType<
+  MapType<TransactionData, Principal, string>,
   bigint,
   string
 >;
-export type Data = {
-  now: string;
-  data: Transaction[];
-};
+export type TransactionData = Transaction[];
+export type ListingsData = Awaited<ReturnType<_SERVICE["listings"]>>;
+export type ListingsJsonData = MapType<
+  MapType<ListingsData, Principal, string>,
+  bigint,
+  string
+>;
 
-const SNAPSHOT_PATH = `${__dirname}/cache/transactions.json`;
+export const TRANSACTIONS_PATH = `${__dirname}/cache/transactions.json`;
+export const LISTINGS_PATH = `${__dirname}/cache/listings.json`;
 
-export async function saveData(channel: TextChannel) {
-  let txs: Data;
+export async function saveListings() {
+  const now = DateTime.utc().toISO();
+  let txs: ListingsData;
+  try {
+    txs = await fetchAllListings();
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  fs.writeFileSync(LISTINGS_PATH, stringify(txs));
+  console.log(`listings saved at ${now}`);
+  return txs.length;
+}
+
+export async function saveTransactions(channel: TextChannel) {
+  const now = DateTime.utc().toISO();
+  let txs: Transaction[];
   try {
     txs = await fetchRecentTransactions();
   } catch (error) {
@@ -43,26 +57,23 @@ export async function saveData(channel: TextChannel) {
     return;
   }
 
-  let cached: JsonData;
+  let cached: JsonTransactionData;
   try {
-    delete require.cache[require.resolve(SNAPSHOT_PATH)];
-    cached = require(SNAPSHOT_PATH);
+    delete require.cache[require.resolve(TRANSACTIONS_PATH)];
+    cached = require(TRANSACTIONS_PATH);
   } catch (error) {}
-  fs.writeFileSync(SNAPSHOT_PATH, stringify(txs));
-  console.log(`snapshot saved at ${txs.now}`);
+  fs.writeFileSync(TRANSACTIONS_PATH, stringify(txs));
+  console.log(`transactions saved at ${now}`);
 
-  const d = txs.data[0];
-  const { index } = decodeTokenId(d.token);
-  const lootData = data[index.toString()];
-
-  txs.data.forEach((d, i) => {
+  txs.forEach((d, i) => {
     if (!cached) {
       return;
     }
-    if (cached.data.find((prev) => prev.time === d.time.toString())) {
+    if (cached.find((prev) => prev.time === d.time.toString())) {
       return;
     }
     const { index } = decodeTokenId(d.token);
+    const lootData = data[index.toString()];
     console.log("new tx", index, d);
     channel.send({
       embeds: [
