@@ -87,8 +87,7 @@ export async function saveTransactions(channel: TextChannel) {
           }) from [${shortPrincipal(d.seller)}](https://ic.rocks/principal/${
             d.seller
           })
-          \`\`\`${lootData.map(lootDataToString).join("\n")}\`\`\`
-          `,
+\`\`\`${lootData.map(lootDataToString).join("\n")}\`\`\``,
           timestamp: dateTimeFromNanos(d.time).toJSDate(),
         },
       ],

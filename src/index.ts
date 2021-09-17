@@ -21,8 +21,10 @@ client.once("ready", async () => {
   const tasks = async () => {
     saveTransactions(channel as TextChannel);
     const listings = await saveListings();
-    client.user?.setUsername(`Floor ${floorPrice()} ICP`);
-    client.user?.setActivity(`${listings} Drip listed`, { type: "WATCHING" });
+    await client.user?.setUsername(`Floor ${floorPrice()} ICP`);
+    client.user?.setActivity(`${listings} Drip listed`, {
+      type: "WATCHING",
+    });
   };
   setInterval(tasks, 30000);
   tasks();
