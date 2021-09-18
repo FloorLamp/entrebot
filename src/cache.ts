@@ -2,8 +2,7 @@ import { Principal } from "@dfinity/principal";
 import { TextChannel } from "discord.js";
 import fs from "fs";
 import { DateTime } from "luxon";
-import dataJson from "./cache/data.json";
-import { LootData } from "./Drip/Drip.did";
+import { dataJson } from "./common";
 import { fetchAllListings, fetchRecentTransactions } from "./fetchData";
 import { Awaited, MapType } from "./types";
 import {
@@ -15,7 +14,6 @@ import {
   stringify,
 } from "./utils";
 import { Transaction, _SERVICE } from "./Wrapper/Wrapper.did";
-const data = dataJson as Record<string, LootData[]>;
 
 export type JsonTransactionData = MapType<
   MapType<TransactionData, Principal, string>,
@@ -73,8 +71,13 @@ export async function saveTransactions(channel: TextChannel) {
       return;
     }
     const { index } = decodeTokenId(d.token);
-    const lootData = data[index.toString()];
+    const lootData = dataJson[index.toString()];
     console.log("new tx", index, d);
+
+    if (process.env.NO_TRANSACTIONS) {
+      return;
+    }
+
     channel.send({
       embeds: [
         {

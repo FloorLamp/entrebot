@@ -1,10 +1,8 @@
 import { DateTime } from "luxon";
-import dataJson from "./cache/data.json";
-import { wrapper } from "./common";
+import { dataJson, wrapper } from "./common";
 import { LootData } from "./Drip/Drip.did";
 import { lootDataToString, tokenIdentifier } from "./utils";
 import { canisterId } from "./Wrapper";
-const data = dataJson as Record<string, LootData[]>;
 
 type Listing = {
   id: string;
@@ -28,7 +26,7 @@ export async function fetchListings(
   query: Partial<LootData> = { name_prefix: "8 Bit" }
 ) {
   const queryEntries = Object.entries(query);
-  const allMatches = Object.entries(data)
+  const allMatches = Object.entries(dataJson)
     .map(([id, items]: [string, LootData[]]) => [
       id,
       items.filter((item) => {
@@ -67,7 +65,7 @@ export async function fetchListings(
           const id = allMatches[i][0];
           return {
             id,
-            data: data[id].map(lootDataToString),
+            data: dataJson[id].map(lootDataToString),
             account: res.ok[0],
             principal: listing.seller.toText(),
             price: Number(listing.price) / 1e8,

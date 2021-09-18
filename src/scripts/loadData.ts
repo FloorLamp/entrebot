@@ -1,6 +1,6 @@
 import fs from "fs";
-import { drip } from "./common";
-import { LootData } from "./Drip/Drip.did";
+import { drip } from "../common";
+import { LootData } from "../Drip/Drip.did";
 
 async function loadData() {
   const data: Record<string, LootData[]> = {};

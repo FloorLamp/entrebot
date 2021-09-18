@@ -12,7 +12,7 @@
 
 # frontend code
 node_modules/
-dist/
+build/
 transactions.json
 listings.json
 .env

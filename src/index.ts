@@ -1,5 +1,12 @@
-import { Client, Intents, TextChannel } from "discord.js";
+import {
+  Client,
+  Collection,
+  CommandInteraction,
+  Intents,
+  TextChannel,
+} from "discord.js";
 import "dotenv/config";
+import fs from "fs";
 import { saveListings, saveTransactions } from "./cache";
 import { floorPrice } from "./commands";
 
@@ -27,6 +34,10 @@ client.once("ready", async () => {
   const tasks = async () => {
     saveTransactions(channel as TextChannel);
     const listings = await saveListings();
+
+    if (process.env.NO_STATUS) {
+      return;
+    }
     guild?.me?.setNickname(`Floor ${floorPrice()} ICP`);
     client.user?.setActivity(`${listings} Drip listed`, {
       type: "WATCHING",
@@ -34,6 +45,37 @@ client.once("ready", async () => {
   };
   setInterval(tasks, 30000);
   tasks();
+});
+
+const commands = new Collection<
+  string,
+  { execute: (arg: CommandInteraction) => Promise<any> }
+>();
+const commandFiles = fs
+  .readdirSync(`${__dirname}/commands`)
+  .filter((file) => /(js|ts)$/.test(file));
+
+for (const file of commandFiles) {
+  const command = require(`${__dirname}/commands/${file}`);
+  commands.set(command.data.name, command);
+}
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const command = commands.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    return interaction.reply({
+      content: "There was an error while executing this command!",
+      ephemeral: true,
+    });
+  }
 });
 
 client.login(process.env.API_KEY);
