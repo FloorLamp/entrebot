@@ -8,7 +8,7 @@ import {
 import "dotenv/config";
 import fs from "fs";
 import { saveListings, saveTransactions } from "./cache";
-import { floorPrice } from "./commands";
+import { floorPrice } from "./queries";
 
 if (!process.env.API_KEY) {
   console.warn("API_KEY not set!");
