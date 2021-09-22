@@ -1,3 +1,4 @@
+import fs from "fs";
 import { ListingsJsonData, LISTINGS_PATH } from "./cache";
 import { dataJson } from "./common";
 import { LootData } from "./Drip/Drip.did";
@@ -5,8 +6,7 @@ import { LootData } from "./Drip/Drip.did";
 const getListings = () => {
   let listings: ListingsJsonData = [];
   try {
-    delete require.cache[require.resolve(LISTINGS_PATH)];
-    listings = require(LISTINGS_PATH);
+    listings = JSON.parse(fs.readFileSync(LISTINGS_PATH).toString());
   } catch (error) {
     console.warn("listings not found in cache");
   }

@@ -57,8 +57,7 @@ export async function saveTransactions(channel: TextChannel) {
 
   let cached: JsonTransactionData;
   try {
-    delete require.cache[require.resolve(TRANSACTIONS_PATH)];
-    cached = require(TRANSACTIONS_PATH);
+    cached = JSON.parse(fs.readFileSync(TRANSACTIONS_PATH).toString());
   } catch (error) {}
   fs.writeFileSync(TRANSACTIONS_PATH, stringify(txs));
   console.log(`transactions saved at ${now}`);
