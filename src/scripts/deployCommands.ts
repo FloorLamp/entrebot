@@ -2,6 +2,11 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import fs from "fs";
 
+if (!process.env.CLIENT_ID) {
+  console.warn("CLIENT_ID not set!");
+  process.exit(1);
+}
+
 const commandFiles = fs
   .readdirSync(`${__dirname}/../commands`)
   .filter((file) => /(js|ts)$/.test(file));
