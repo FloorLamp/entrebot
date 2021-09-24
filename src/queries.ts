@@ -20,6 +20,10 @@ export const floorPrice = () => {
   return Math.min(...listings.map(([id, { price }]) => Number(price) / 1e8));
 };
 
+/**
+ *
+ * @returns count: number of listings that matched
+ */
 export const searchListings = (query: string | Partial<LootData>) => {
   const listings = getListings();
   if (!listings.length) {
