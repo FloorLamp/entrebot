@@ -57,6 +57,7 @@ const commandFiles = fs
 
 for (const file of commandFiles) {
   const command = require(`${__dirname}/commands/${file}`);
+  console.log(`loaded command /${command.data.name}`);
   commands.set(command.data.name, command);
 }
 
